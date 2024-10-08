@@ -3,22 +3,22 @@ Stock Utilities
 
 The main tool is the *qu* script that gets installed to **~/bin**.
 
-Installing the Repo
+Cloning the Repo
 ----------------------
 
-Install this repo into your account::
+Clone this repo into your account::
 
    git clone https://github.com/pcarinhas/stocks
    cd stocks
 
-Then follow the requirements and Installation section below.
+Then follow the Requirements and Installation section below.
 
 Requirements
 -------------
 
-* You should be running Linux
+* You should be running Linux, and be able to open a terminal.
 * You must have a version of Python installed in your personal account.
-  If you don't have one you may be able to use the given Makefile to install
+  If you don't have one you may use the included Makefile to install
   one::
 
      make python
@@ -43,7 +43,5 @@ Usage of *qu*
 
 To use **qu**, open a terminal and type::
 
+   source pyenv.sh  # Unless pyenv.sh is activated in ~/.bashrc as above.
    qu amd intc
-
-
-
