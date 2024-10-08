@@ -1,7 +1,8 @@
 Stock Utilities
 ===================
-
 The main tool is the *qu* script that gets installed to **~/bin**.
+
+.. image:: screenshot.png
 
 Cloning the Repo
 ----------------------
