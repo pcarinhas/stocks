@@ -56,3 +56,4 @@ deps:
 install: deps
 	mkdir -p $(HOME)/bin
 	cp scripts/* $(HOME)/bin
+	mv $(HOME)/bin/qu.py $(HOME)/bin/qu
