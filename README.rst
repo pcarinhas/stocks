@@ -1,8 +1,10 @@
 Stock Utilities
 ===================
-The main tool is the *qu* script that gets installed to **~/bin**.
+The main tool is the *qu* script that gets installed to **$HOME/bin**.
 
 .. image:: screenshot.png
+
+.. note:: All data is extracted from the Yahoo Finance API.
 
 Cloning the Repo
 ----------------------
