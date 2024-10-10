@@ -306,6 +306,10 @@ for symbol in sys.argv[1:]:
     table.append([high, low, diff, shares_inside_pct])
 
     _bid = ticker_info.get("bid")
+    if not _bid:
+        print("Missing bid: skipping: ", symbol.upper())
+        continue
+
     bid = f"Bid: {_bid:>11.2f}"
     _ask = ticker_info.get("ask")
     ask = f"Ask: {_ask:11}"
@@ -322,7 +326,7 @@ for symbol in sys.argv[1:]:
     else:
         _beta = "Beta:     N/A"
 
-    short_timestamp = ticker_info.get("dateShortInterest")
+    # short_timestamp = ticker_info.get("dateShortInterest")
 
     table.append([bid_size, ask_size, _beta, ""])
     table1 = tabulate(table, tablefmt="outline")
