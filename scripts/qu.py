@@ -237,9 +237,6 @@ for symbol in sys.argv[1:]:
     current_val = color_trigger(current, change, "green")
     short_name = ticker.info.get("shortName")
     country = ticker.info.get("country", "None")
-    # if not country:
-    #     print("Missing Country; skipping: ", symbol.upper())
-    #     continue
     exchange = ticker.info.get("exchange")
     value = (
         f"{symbol.upper()}: {short_name} "
@@ -306,19 +303,29 @@ for symbol in sys.argv[1:]:
     table.append([high, low, diff, shares_inside_pct])
 
     _bid = ticker_info.get("bid")
-    if not _bid:
-        print("Missing bid: skipping: ", symbol.upper())
-        continue
-
-    bid = f"Bid: {_bid:>11.2f}"
     _ask = ticker_info.get("ask")
-    ask = f"Ask: {_ask:11}"
-    _diff = round(_ask - _bid, 4)
-    spread = f"Spread: {_diff:>6.2f}"
+    if not _bid or not _ask:
+        bid = "-"
+        ask = "-"
+        _diff = "-"
+        spread = "-"
+    else:
+        bid = f"Bid: {_bid:>11.2f}"
+        ask = f"Ask: {_ask:11}"
+        _diff = round(_ask - _bid, 4)
+        spread = f"Spread: {_diff:>6.2f}"
+
     table.append([bid, ask, spread, shares_inst])
 
-    bid_size = f"BidSize: {ticker_info.get('bidSize'):>7}"
-    ask_size = f"AskSize: {ticker_info.get('askSize'):>7}"
+    _bid_size = ticker_info.get("bidSize")
+    _ask_size = ticker_info.get("askSize")
+    if not _bid_size or not _ask_size:
+        bid_size = "-"
+        ask_size = "-"
+    else:
+        bid_size = f"BidSize: {_bid_size:>7}"
+        ask_size = f"AskSize: {_ask_size:>7}"
+
     _beta = ticker_info.get("beta")
     if _beta:
         _beta = round(ticker_info.get("beta"), 4)
