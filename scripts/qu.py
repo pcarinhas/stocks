@@ -347,7 +347,17 @@ for symbol in sys.argv[1:]:
     num_of_analysts = tricolor_bias_high(num_of_analysts)
     table.append(["Num Analysts: ", num_of_analysts])
 
-    table.append(["Recommendation:", ticker_info.get("recommendationKey", "-").upper()])
+    recommendation = ticker_info.get("recommendationKey", "-").lower().strip()
+    if "buy" in recommendation:
+        recommendation = colored(recommendation.upper(), "green", attrs=["bold"])
+    elif "hold" in recommendation:
+        recommendation = colored(recommendation.upper(), "yellow", attrs=["bold"])
+    elif "sell" in recommendation or "underperform" in recommendation:
+        recommendation = colored(recommendation.upper(), "red", attrs=["bold"])
+    else:
+        recommendation = recommendation.upper()
+
+    table.append(["Recommendation:", recommendation])
     table.append(["TargetLow:", ticker_info.get("targetLowPrice", "-")])
     table.append(["TargetHigh:", ticker_info.get("targetHighPrice", "-")])
     target_mean = ticker_info.get("targetMeanPrice")
