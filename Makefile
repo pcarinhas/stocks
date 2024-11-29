@@ -53,7 +53,7 @@ python: pyenv
 deps:
 	pip install -r requirements.txt
 
-install: deps
+install:
 	mkdir -p $(HOME)/bin
 	cp scripts/* $(HOME)/bin
 	mv $(HOME)/bin/qu.py $(HOME)/bin/qu

@@ -13,6 +13,7 @@ import datetime
 import sys
 import warnings
 from io import StringIO
+import re
 
 
 import pytz
@@ -23,6 +24,7 @@ import yfinance as yf
 # from yfin import YFinance as yf
 
 warnings.simplefilter("ignore")
+ticker_re = re.compile(r"^\w+(?:[\w-]*\w)?$")
 
 
 def currency_symbol(currency):
@@ -186,6 +188,13 @@ def side_by_side_tables(*tables):
 
 
 for symbol in sys.argv[1:]:
+
+    if not ticker_re.match(symbol):
+        warning = format(f"Ticker {symbol} is not a valid symbol. Skipping ...")
+        warning = colored(warning, "yellow", attrs=["bold"])
+        print(warning)
+        continue
+
     ticker = yf.Ticker(symbol)
 
     try:
