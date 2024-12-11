@@ -199,7 +199,8 @@ for symbol in sys.argv[1:]:
 
     try:
         ticker_info = ticker.info
-    except Exception:
+    except Exception as e:
+        print(e)
         message = format(f"NOTE: Ticker {ticker} does not exist!")
         message = colored(message, "red", attrs=["bold"])
         print(message)
@@ -286,6 +287,13 @@ for symbol in sys.argv[1:]:
         shares_inst_pct = round(shares_inst * 100.0, 1)
         shares_inst = f"Institu Pct: {shares_inst_pct:4}%"
 
+    options = ticker.options
+    options_count = None
+    if options:
+        opts = len(options)
+        opts = color_bias(opts)
+        options_count = f"Options: {opts:>16}"
+
     # Sometimes the open values are not correct in info. Its ugly.
     _open = round(ticker_info.get("open"), 5)
     if not _open:
@@ -344,7 +352,7 @@ for symbol in sys.argv[1:]:
 
     # short_timestamp = ticker_info.get("dateShortInterest")
 
-    table.append([bid_size, ask_size, _beta, ""])
+    table.append([bid_size, ask_size, _beta, options_count])
     table1 = tabulate(table, tablefmt="outline")
     print(table1)
 
@@ -521,9 +529,12 @@ for symbol in sys.argv[1:]:
     # -------------------------------------------------------------------------
     # Dividend History
     # -------------------------------------------------------------------------
-    # This history is to limit dividend horizon to 1 year:
-    history = ticker.history(period="1y")
-    table = []
+    # if there are no dividends, continue
+    if not ticker.history(period="max").any().Dividends:
+        continue
+
+    # limit dividend horizon to 1 year:
+    history = ticker.history(period="ytd")
     dividends = ticker.get_dividends()
     dividend_table = None
     if not dividends.empty:
