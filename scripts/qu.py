@@ -24,7 +24,8 @@ import yfinance as yf
 # from yfin import YFinance as yf
 
 warnings.simplefilter("ignore")
-ticker_re = re.compile(r"^\w+(?:[\w-]*\w)?$")
+# ticker_re = re.compile(r"^\w+(?:[\w-]*\w)?$")
+ticker_re = re.compile(r"^\^?\w+(?:[\-]\w)?$")
 
 
 def currency_symbol(currency):
@@ -190,7 +191,7 @@ def side_by_side_tables(*tables):
 for symbol in sys.argv[1:]:
 
     if not ticker_re.match(symbol):
-        warning = format(f"Ticker {symbol} is not a valid symbol. Skipping ...")
+        warning = format(f"Ticker {symbol} is not a valid ticker symbol... Shamefull!")
         warning = colored(warning, "yellow", attrs=["bold"])
         print(warning)
         continue
@@ -210,7 +211,7 @@ for symbol in sys.argv[1:]:
     current = ticker_info.get("currentPrice")
     if not current:
         try:
-            ticker.history(period="1yr")
+            ticker.history(period="max")
             current = ticker.history_metadata.get("regularMarketPrice")
         except Exception as ex:
             print(type(ex))
@@ -263,6 +264,8 @@ for symbol in sys.argv[1:]:
 
     table = []
     _vol = ticker_info.get("volume")
+    if not _vol:
+        continue
     volume = f"Volume: {_vol:>8}"
     _ave_vol = ticker_info.get("averageVolume")
     if not _ave_vol:
