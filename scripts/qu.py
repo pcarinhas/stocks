@@ -197,6 +197,12 @@ for symbol in sys.argv[1:]:
         continue
 
     ticker = yf.Ticker(symbol)
+    # If the length of ticker_info is small, its probably a dud.
+    if len(ticker.info) <= 2:
+        message = format(f"NOTE: {ticker.ticker} missing data! Possibly delisted!!")
+        message = colored(message, "red", attrs=["bold"])
+        print(message)
+        continue
 
     try:
         ticker_info = ticker.info
@@ -220,6 +226,7 @@ for symbol in sys.argv[1:]:
                 sys.exit(1)
             current = data.get("Close").iloc[-1]
 
+    # If no current price, just skip
     if not current:
         continue
 
@@ -537,7 +544,7 @@ for symbol in sys.argv[1:]:
         continue
 
     # limit dividend horizon to 1 year:
-    history = ticker.history(period="ytd")
+    history = ticker.history(period="1y")
     dividends = ticker.get_dividends()
     dividend_table = None
     if not dividends.empty:
