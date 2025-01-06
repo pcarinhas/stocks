@@ -544,11 +544,12 @@ for symbol in sys.argv[1:]:
         continue
 
     # limit dividend horizon to 1 year:
-    history = ticker.history(period="1y")
+    history = ticker.history(period="2y")
+
     dividends = ticker.get_dividends()
     dividend_table = None
     if not dividends.empty:
-        data = dividends.to_csv()
+        data = dividends.tail(12).to_csv()
         table = csv.reader(StringIO(data))
         dividend_table = tabulate(table, headers="firstrow", tablefmt="outline")
 
