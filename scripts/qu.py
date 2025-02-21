@@ -9,7 +9,7 @@
    * termcolor>=2.3.0
 """
 import csv
-import datetime
+from datetime import datetime
 import sys
 import warnings
 from io import StringIO
@@ -189,7 +189,6 @@ def side_by_side_tables(*tables):
 
 
 for symbol in sys.argv[1:]:
-
     if not ticker_re.match(symbol):
         warning = format(f"Ticker {symbol} is not a valid ticker symbol... Shamefull!")
         warning = colored(warning, "yellow", attrs=["bold"])
@@ -197,6 +196,7 @@ for symbol in sys.argv[1:]:
         continue
 
     ticker = yf.Ticker(symbol)
+    last_trade_date = ticker.history().last_valid_index().date().isoformat()
     # If the length of ticker_info is small, its probably a dud.
     if len(ticker.info) <= 2:
         message = format(f"NOTE: {ticker.ticker} missing data! Possibly delisted!!")
@@ -265,7 +265,7 @@ for symbol in sys.argv[1:]:
     )
     print(value)
     timezone = pytz.timezone("US/Eastern")
-    now = datetime.datetime.now(timezone).strftime("%Y-%m-%d %H:%M:%S %Z")
+    now = datetime.now(timezone).strftime("%Y-%m-%d %H:%M:%S %Z")
     print(f"Time: {now}")
     print(f"Sector/Industry: {ticker_info.get('sector')}/{ticker_info.get('industry')}")
 
