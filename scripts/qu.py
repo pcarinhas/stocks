@@ -549,12 +549,12 @@ for symbol in sys.argv[1:]:
     dividends = ticker.get_dividends()
     dividend_table = None
     if not dividends.empty:
-        data = dividends.tail(12).to_csv()
-        table = csv.reader(StringIO(data))
+        data = dividends.tail(12)
+        table = csv.reader(StringIO(data.to_csv()))
         dividend_table = tabulate(table, headers="firstrow", tablefmt="outline")
 
     if not div_yield:
-        div_rate = round(dividends.sum(), 2)
+        div_rate = round(data.sum(), 2)
         div_yield = div_rate / current
         div_pct = round(div_yield * 100.0, 2)
         if div_rate:
