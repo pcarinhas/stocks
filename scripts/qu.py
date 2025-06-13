@@ -270,11 +270,11 @@ for symbol in sys.argv[1:]:
     print(f"Sector/Industry: {ticker_info.get('sector')}/{ticker_info.get('industry')}")
 
     table = []
-    _vol = ticker_info.get("volume")
+    _vol = ticker_info.get("regularMarketVolume")
     if not _vol:
         continue
     volume = f"Volume: {_vol:>8}"
-    _ave_vol = ticker_info.get("averageVolume")
+    _ave_vol = ticker_info.get("averageDailyVolume3Month")
     if not _ave_vol:
         print("Zero Average Volume: skipping: ", symbol.upper())
         continue
@@ -305,9 +305,9 @@ for symbol in sys.argv[1:]:
         options_count = f"Options: {opts:>16}"
 
     # Sometimes the open values are not correct in info. Its ugly.
-    _open = round(ticker_info.get("open"), 5)
+    _open = round(ticker_info.get("regularMarketOpen"), 5)
     if not _open:
-        _open = round(ticker.get_fast_info.get("open"), 5)
+        _open = round(ticker.get_fast_info.get().open, 5)
     Open = f"Open: {_open:>10.2f}"
     _close = ticker_info.get("regularMarketPreviousClose")
     Close = f"PrevClose: {_close:>5}"
@@ -315,9 +315,9 @@ for symbol in sys.argv[1:]:
     delta = f"OpenDif: {delta:>14}"
     table.append([Open, Close, delta, shares_float])
 
-    _high = ticker_info.get("dayHigh")
+    _high = ticker_info.get("regularMarketDayHigh")
     high = f"High: {_high:>10.2f}"
-    _low = round(ticker_info.get("dayLow"), 2)
+    _low = round(ticker_info.get("regularMarketDayLow"), 2)
     low = f"Low: {_low:>11.2f}"
     _diff = round(_high - _low, 4)
     diff = f"Diff: {_diff:>8.2f}"
@@ -370,11 +370,15 @@ for symbol in sys.argv[1:]:
     # Analysts
     # -------------------------------------------------------------------------
     table = []
-    num_of_analysts = ticker_info.get("numberOfAnalystOpinions", "0")
-    num_of_analysts = tricolor_bias_high(num_of_analysts)
+    num_of_analysts = ticker_info.get("numberOfAnalystOpinions")
+    if num_of_analysts:
+        num_of_analysts = tricolor_bias_high(num_of_analysts)
+    else:
+        num_of_analysts = "-"
+
     table.append(["Num Analysts: ", num_of_analysts])
 
-    recommendation = ticker_info.get("recommendationKey", "-").lower().strip()
+    recommendation = ticker_info.get("averageAnalystRating", "-").lower().strip()
     if "buy" in recommendation:
         recommendation = colored(recommendation.upper(), "green", attrs=["bold"])
     elif "hold" in recommendation:
@@ -472,8 +476,8 @@ for symbol in sys.argv[1:]:
         ratio_table.append(["NAV:", nav_price])
     ratio_table = tabulate(ratio_table, tablefmt="outline")
 
-    trailing_eps = ticker_info.get("trailingEps")
-    forward_eps = ticker_info.get("forwardEps")
+    trailing_eps = ticker_info.get("epsTrailingTwelveMonths")
+    forward_eps = ticker_info.get("epsForward")
 
     # -------------------------------------------------------------------------
     # Earnings
