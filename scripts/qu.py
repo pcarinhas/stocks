@@ -1,20 +1,18 @@
 #! /usr/bin/env python3
 """Get Quotes from Yahoo
 
-   Install these four
-   ------------------
-   * pytz>=2023.3.post1
-   * yfinance>=0.2.28
-   * tabulate>=0.9.0
-   * termcolor>=2.3.0
+Install these four
+------------------
+* pytz>=2023.3.post1
+* yfinance>=0.2.28
+* tabulate>=0.9.0
+* termcolor>=2.3.0
 """
-import csv
 from datetime import datetime
 import sys
 import warnings
-from io import StringIO
 import re
-
+import pandas as pd
 
 import pytz
 from tabulate import tabulate
@@ -543,21 +541,25 @@ for symbol in sys.argv[1:]:
     # -------------------------------------------------------------------------
     # Dividend History
     # -------------------------------------------------------------------------
-    # if there are no dividends, continue
-    if not ticker.history(period="max").any().Dividends:
+    # if no dividends, continue
+    if div_yield or not ticker.history(period="max").any().Dividends:
         continue
 
     # limit dividend horizon to 1 year:
-    history = ticker.history(period="2y")
+    history = ticker.history(period="1y")
 
     dividends = ticker.get_dividends()
     dividend_table = None
     if not dividends.empty:
-        data = dividends.tail(12)
-        table = csv.reader(StringIO(data.to_csv()))
-        dividend_table = tabulate(table, headers="firstrow", tablefmt="outline")
+        tz = dividends.index.tz
+        one_year_ago = pd.Timestamp.now(tz=tz) - pd.Timedelta(days=365)
+        recent_dividends = dividends[dividends.index >= one_year_ago]
+        data = recent_dividends.tail(12)
+        if not data.empty:
+            df = data.reset_index()
+            df.columns = ["Date", "Amount"]
+            dividend_table = tabulate(df, headers="keys", tablefmt="outline")
 
-    if not div_yield:
         div_rate = round(data.sum(), 2)
         div_yield = div_rate / current
         div_pct = round(div_yield * 100.0, 2)
