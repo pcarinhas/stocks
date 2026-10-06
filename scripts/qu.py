@@ -75,8 +75,21 @@ def color_trigger(num, trigger, poscolor="green"):
     return colored(num, poscolor)
 
 
+def tricolor_bias(num, low_cutoff, high_cutoff):
+    """Colorize, using sign of trigger, negative numbers are bad"""
+    if float(num) <= low_cutoff:
+        return colored(num, "red", attrs=["bold"])
+    if float(num) >= high_cutoff:
+        return colored(num, "green", attrs=["bold"])
+    return colored(num, "yellow")
+
+
 def tricolor_bias_low(num, cutoff=4.0, poscolor="green"):
     """Colorize, using sign of trigger, negative numbers are bad"""
+    # If the number doesn't exist, return a dash
+    if not num:
+        return "-"
+
     if float(num) <= 0:
         return colored(num, "red", attrs=["bold"])
     if float(num) >= cutoff:
@@ -84,18 +97,9 @@ def tricolor_bias_low(num, cutoff=4.0, poscolor="green"):
     return colored(num, poscolor)
 
 
-def tricolor_bias_high(num, cutoff=4.0, poscolor="green"):
-    """Colorize, using sign of trigger, negative numbers are bad"""
-    if float(num) <= 0:
-        return colored(num, "red", attrs=["bold"])
-    if float(num) <= cutoff:
-        return colored(num, "yellow", attrs=["bold"])
-    return colored(num, poscolor)
-
-
 def quadcolor_trigger(num, trigger=None, neg_value=1.0, warn_value=1.5, good_value=2.5):
     """For Quick and Current Ratios, colorize results"""
-    # If the number doesn't exist, we return a dash to indicate non-existance
+    # If the number doesn't exist, we return a dash
     if not num:
         return "-"
 
@@ -158,6 +162,22 @@ def color_pct_trigger(num, trigger, poscolor="orange", negcolor="yellow"):
     return output
 
 
+def return_on_equity(ticker):
+
+    try:
+        net_income = ticker.financials.loc["Net Income"].iloc[0]
+        stockholders_equity = ticker.balance_sheet.loc["Stockholders Equity"].iloc[0]
+        if stockholders_equity <= 0:
+            return "-"
+
+        roe = round(net_income / stockholders_equity, 2)
+        if pd.isna(roe):
+            return "-"
+        return tricolor_bias(roe, 0.1, 0.2)
+    except (KeyError, IndexError, ZeroDivisionError):
+        return None
+
+
 def side_by_side_tables(*tables):
     # Remove None in tables, though this should not happen.
     _tables = [x for x in tables if x is not None]
@@ -194,6 +214,7 @@ for symbol in sys.argv[1:]:
         continue
 
     ticker = yf.Ticker(symbol)
+
     last_trade_date = ticker.history().last_valid_index().date().isoformat()
     # If the length of ticker_info is small, its probably a dud.
     if len(ticker.info) <= 2:
@@ -370,7 +391,7 @@ for symbol in sys.argv[1:]:
     table = []
     num_of_analysts = ticker_info.get("numberOfAnalystOpinions")
     if num_of_analysts:
-        num_of_analysts = tricolor_bias_high(num_of_analysts)
+        num_of_analysts = tricolor_bias(num_of_analysts, 2, 4)
     else:
         num_of_analysts = "-"
 
@@ -472,22 +493,27 @@ for symbol in sys.argv[1:]:
     nav_price = ticker_info.get("navPrice")
     if nav_price:
         ratio_table.append(["NAV:", nav_price])
-    ratio_table = tabulate(ratio_table, tablefmt="outline")
 
-    trailing_eps = ticker_info.get("epsTrailingTwelveMonths")
-    forward_eps = ticker_info.get("epsForward")
+    roe = return_on_equity(ticker)
+    if roe is not None:
+        ratio_table.append(["ROE:", roe])
+
+    ratio_table = tabulate(ratio_table, tablefmt="outline")
 
     # -------------------------------------------------------------------------
     # Earnings
     # -------------------------------------------------------------------------
     table = []
     earnings_table = None
+
+    trailing_eps = ticker_info.get("epsTrailingTwelveMonths")
     if trailing_eps:
         trailing_eps_formatted = color_bias(trailing_eps)
         table.append(["TrailingEps:", trailing_eps_formatted])
     else:
         table.append(["TrailingEps:", "-"])
 
+    forward_eps = ticker_info.get("epsForward")
     if forward_eps:
         forward_eps_formatted = color_bias(forward_eps)
         table.append(["ForwardEps:", forward_eps_formatted])
